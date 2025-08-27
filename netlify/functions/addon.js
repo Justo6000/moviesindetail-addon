@@ -1,10 +1,9 @@
 // netlify/functions/addon.js
 const express = require("express");
 const cors = require("cors");
-const { addonBuilder, getInterface, getManifest } = require("stremio-addon-sdk");
+const { addonBuilder } = require("stremio-addon-sdk"); // <- solo addonBuilder
 const serverless = require("serverless-http");
 
-// Vars desde Netlify → Environment
 const {
   ADDON_NAME = "MoviesInDetail: Open Link",
   ADDON_DESCRIPTION = "Adds a direct link to moviesindetail.com for IMDb titles.",
@@ -12,7 +11,6 @@ const {
   LOGO = "https://moviesindetail.com/images/icon-192.webp"
 } = process.env;
 
-// Manifest Stremio
 const manifest = {
   id: "org.moviesindetail.openlink",
   version: "1.0.0",
@@ -27,13 +25,9 @@ const manifest = {
 
 const builder = new addonBuilder(manifest);
 
-// Util
-const linkFromId = (id) => LINK_TEMPLATE.replace(/{{id}}/g, id);
-
-// META handler
+// META
 builder.defineMetaHandler(async ({ type, id }) => {
   if (!/^tt\d{7,}$/.test(id || "")) return { meta: null };
-
   return {
     meta: {
       id,
@@ -41,7 +35,7 @@ builder.defineMetaHandler(async ({ type, id }) => {
       name: `Open in MoviesInDetail (${id})`,
       poster: LOGO,
       description: "Open full details on moviesindetail.com",
-      links: [{ name: "Open in MoviesInDetail", url: linkFromId(id) }]
+      links: [{ name: "Open in MoviesInDetail", url: LINK_TEMPLATE.replace(/{{id}}/g, id) }]
     }
   };
 });
@@ -49,11 +43,11 @@ builder.defineMetaHandler(async ({ type, id }) => {
 const app = express();
 app.use(cors());
 
-// Interfaz correcta del SDK v1.6.x
-const iface = getInterface(builder);
+// <- interfaz correcta del SDK
+const iface = builder.getInterface();
 
 // Rutas
-app.get("/manifest.json", (_req, res) => res.json(getManifest(builder)));
+app.get("/manifest.json", (_req, res) => res.json(manifest));
 app.get("/:resource/:type/:id.json", (req, res) => iface(req, res));
 app.get("/", (_req, res) => {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -63,5 +57,4 @@ app.get("/", (_req, res) => {
 <p>Ejemplo: <code>/meta/movie/tt0133093.json</code></p>`);
 });
 
-// Export Netlify Function
 module.exports.handler = serverless(app, { binary: [] });
