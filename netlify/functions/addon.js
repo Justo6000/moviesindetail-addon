@@ -62,11 +62,13 @@ app.get("/stream/:type/:id.json", (req, res) => {
   const { url } = normalizeId(type, id);
 
   const streams = [{
-    name: "MoviesInDetail",                     // etiqueta corta
-    title: "Open in MoviesInDetail",            // texto en la lista
-    url,                                        // enlace externo
-    behaviorHints: {                             // marca como externo
-      notWebReady: true
+    name: "MoviesInDetail",           // etiqueta corta
+    title: "Open in MoviesInDetail",  // texto en la lista
+    url,                              // enlace visible
+    externalUrl: url,                 // fuerza clientes a tratarlo como externo
+    behaviorHints: {
+      notWebReady: true,              // no reproducible internamente
+      openExternal: true              // preferir abrir fuera (navegador/webview)
     }
   }];
 
