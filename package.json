@@ -1,8 +1,8 @@
 {
   "name": "moviesindetail.addon",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Stremio addon that adds an Open in MoviesInDetail link for any ID.",
+  "description": "Stremio stream addon that adds an external link to moviesindetail.com.",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
