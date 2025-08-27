@@ -1,12 +1,11 @@
 {
-  "name": "moviesindetail-stremio-addon",
+  "name": "moviesindetail.addon",
   "version": "1.0.0",
   "private": true,
   "description": "Stremio meta addon that adds a link to moviesindetail.com for IMDb IDs.",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "serverless-http": "^3.2.0",
-    "stremio-addon-sdk": "1.6.3"
+    "serverless-http": "^3.2.0"
   }
 }
