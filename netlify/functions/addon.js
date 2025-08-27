@@ -18,23 +18,37 @@ function normalizeId(rawType, rawId) {
 
   if (/^tt\d{7,}$/.test(x)) return { url: `${LINK_BASE}?imdb=${x}` };                         // IMDb
   const mTmdb = x.match(/^tmdb:(movie|tv|person):(\d+)$/i);
-  if (mTmdb) { const kind = mTmdb[1].toLowerCase(); const id = mTmdb[2];
-    return { url: `${LINK_BASE}?tmdb=${id}&type=${kind}` }; }
+  if (mTmdb) {
+    const kind = mTmdb[1].toLowerCase();
+    const id = mTmdb[2];
+    return { url: `${LINK_BASE}?tmdb=${id}&type=${kind}` };
+  }
   if (/^\d+$/.test(x) && (t === "movie" || t === "series")) {                                 // solo número → TMDb por tipo
     const kind = t === "series" ? "tv" : "movie";
     return { url: `${LINK_BASE}?tmdb=${x}&type=${kind}` };
   }
-  const mTvdb = x.match(/^tvdb:(\d+)$/i);  if (mTvdb)  return { url: `${LINK_BASE}?tvdb=${mTvdb[1]}&type=${t}` };
+  const mTvdb = x.match(/^tvdb:(\d+)$/i);
+  if (mTvdb) return { url: `${LINK_BASE}?tvdb=${mTvdb[1]}&type=${t}` };
   const mTrak = x.match(/^trakt:(movie|show|episode):([A-Za-z0-9\-]+)$/i);
-  if (mTrak) { const kind = mTrak[1].toLowerCase(); const id = mTrak[2];
-    return { url: `${LINK_BASE}?trakt=${id}&kind=${kind}` }; }
-  const mAni  = x.match(/^anidb:(\d+)$/i); if (mAni)  return { url: `${LINK_BASE}?anidb=${mAni[1]}` };
-  const mMal  = x.match(/^mal:(anime|manga):(\d+)$/i);
-  if (mMal) { const kind = mMal[1].toLowerCase(); const id = mMal[2];
-    return { url: `${LINK_BASE}?mal=${id}&kind=${kind}` }; }
-  const mKitsu= x.match(/^kitsu:(anime|manga):(\d+)$/i);
-  if (mKitsu){ const kind = mKitsu[1].toLowerCase(); const id = mKitsu[2];
-    return { url: `${LINK_BASE}?kitsu=${id}&kind=${kind}` }; }
+  if (mTrak) {
+    const kind = mTrak[1].toLowerCase();
+    const id = mTrak[2];
+    return { url: `${LINK_BASE}?trakt=${id}&kind=${kind}` };
+  }
+  const mAni = x.match(/^anidb:(\d+)$/i);
+  if (mAni) return { url: `${LINK_BASE}?anidb=${mAni[1]}` };
+  const mMal = x.match(/^mal:(anime|manga):(\d+)$/i);
+  if (mMal) {
+    const kind = mMal[1].toLowerCase();
+    const id = mMal[2];
+    return { url: `${LINK_BASE}?mal=${id}&kind=${kind}` };
+  }
+  const mKitsu = x.match(/^kitsu:(anime|manga):(\d+)$/i);
+  if (mKitsu) {
+    const kind = mKitsu[1].toLowerCase();
+    const id = mKitsu[2];
+    return { url: `${LINK_BASE}?kitsu=${id}&kind=${kind}` };
+  }
 
   return { url: `${LINK_BASE}?id=${encodeURIComponent(x)}&type=${t}` };                       // fallback
 }
@@ -64,10 +78,14 @@ const manifest = {
   name: ADDON_NAME,
   description: ADDON_DESCRIPTION,
   logo: LOGO,
-  resources: ["stream"],                         // ← STREAM addon
+  resources: ["stream"],                         // STREAM addon
   types: ["movie", "series"],
-  idPrefixes: ["tt","tmdb","tvdb","trakt","anidb","mal","kitsu"], // consulta con todos
-  catalogs: []
+  idPrefixes: ["tt", "tmdb", "tvdb", "trakt", "anidb", "mal", "kitsu"],
+  catalogs: [],
+  stremioAddonsConfig: {
+    issuer: "https://stremio-addons.net",
+    signature: "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..rnh8FCco4nMRfMcE3Jd9qA.PoumAgXBLmUDGy9wJDRvoq0gZL8fiqGVR8IdJX9K_cdIV2amt8HULJ7wkk0svb14Kq2Zi8vwFc9EvDgBEv51e4f8SEncWpdGrlN_UjuDwyxLP6tFxZmqveMYM2nlz7Cb.fEAuvqvrCVEHusQaucFizg"
+  }
 };
 
 const app = express();
@@ -85,16 +103,18 @@ app.get("/stream/:type/:id.json", async (req, res) => {
 
   // iOS (Stremio Lite) intenta reproducir 'url' internamente.
   // Enviamos SOLO 'externalUrl' y behaviorHints para forzar navegador.
-  const streams = [{
-    name: "MoviesInDetail",
-    title: "Open in MoviesInDetail",
-    externalUrl: searchUrl,
-    behaviorHints: {
-      openExternal: true,
-      notWebReady: true,
-      uiShowAllSources: true
+  const streams = [
+    {
+      name: "MoviesInDetail",
+      title: "Open in MoviesInDetail",
+      externalUrl: searchUrl,
+      behaviorHints: {
+        openExternal: true,
+        notWebReady: true,
+        uiShowAllSources: true
+      }
     }
-  }];
+  ];
 
   res.json({ streams });
 });
