@@ -7,7 +7,8 @@ const {
   ADDON_NAME = "MoviesInDetail: Open Link",
   ADDON_DESCRIPTION = "Adds an external stream that opens moviesindetail.com for any ID.",
   LINK_BASE = "https://moviesindetail.com/",
-  LOGO = "https://moviesindetail.com/images/icon-192.webp"
+  LOGO = "https://moviesindetail.com/images/icon-192.webp",
+  OMDB_KEY = "" // opcional: si se establece y el ID es IMDb, resolvemos el título
 } = process.env;
 
 // Normaliza IDs para construir el enlace
@@ -38,6 +39,24 @@ function normalizeId(rawType, rawId) {
   return { url: `${LINK_BASE}?id=${encodeURIComponent(x)}&type=${t}` };                       // fallback
 }
 
+// Resuelve a un título legible cuando sea posible (IMDb vía OMDb). Fallback: devuelve el propio ID.
+async function resolveTitle(type, rawId) {
+  const x = (rawId || "").trim();
+  try {
+    if (OMDB_KEY && /^tt\d{7,}$/.test(x)) {
+      const url = `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${encodeURIComponent(x)}`;
+      const resp = await fetch(url);
+      if (resp && resp.ok) {
+        const data = await resp.json();
+        if (data && data.Title) return data.Title;
+      }
+    }
+  } catch (_) {
+    // ignorar errores de red o JSON
+  }
+  return x; // fallback: usa el ID tal cual
+}
+
 const manifest = {
   id: "org.moviesindetail.openlink",
   version: "2.0.0",
@@ -57,15 +76,16 @@ app.get("/manifest.json", (_req, res) => res.json(manifest));
 
 // STREAMS: aparece en la lista de Streams/Torrents de Stremio
 // Ruta: /stream/:type/:id.json
-app.get("/stream/:type/:id.json", (req, res) => {
+app.get("/stream/:type/:id.json", async (req, res) => {
   const { type, id } = req.params;
-  const { url } = normalizeId(type, id);
+  const title = await resolveTitle(type, id);
+  const searchUrl = `${LINK_BASE}?q=${encodeURIComponent(title)}`;
 
   const streams = [{
     name: "MoviesInDetail",           // etiqueta corta
     title: "Open in MoviesInDetail",  // texto en la lista
-    url,                              // enlace visible
-    externalUrl: url,                 // fuerza clientes a tratarlo como externo
+    url: searchUrl,                   // enlace visible
+    externalUrl: searchUrl,           // fuerza clientes a tratarlo como externo
     behaviorHints: {
       notWebReady: true,              // no reproducible internamente
       openExternal: true              // preferir abrir fuera (navegador/webview)
