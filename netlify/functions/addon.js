@@ -17,7 +17,6 @@ const manifest = {
   logo: LOGO,
   resources: ["meta"],
   types: ["movie", "series"],
-  idPrefixes: ["tt"],
   catalogs: []
 };
 
