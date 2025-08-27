@@ -16,3 +16,15 @@ Deploy en Netlify Functions.
 ## Rutas
 - /manifest.json
 - /meta/:type/:id.json  (ej. /meta/movie/tt0133093.json)
+
+---
+
+## Legal Disclaimer
+
+This addon does **not** provide or distribute any video streams or copyrighted content.  
+It only supplies metadata (title, poster, description) and an external link that redirects to **moviesindetail.com**, a site that aggregates publicly available information from official databases (OMDb, Trakt, etc.).  
+
+The addon is intended purely as an informational tool.  
+If you are looking for video playback, you must use authorized and legal streaming services.
+
+By installing or using this addon you acknowledge that it is for informational purposes only.
