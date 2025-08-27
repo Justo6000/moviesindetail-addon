@@ -42,9 +42,10 @@ function normalizeId(rawType, rawId) {
 // Resuelve a un título legible cuando sea posible (IMDb vía OMDb). Fallback: devuelve el propio ID.
 async function resolveTitle(type, rawId) {
   const x = (rawId || "").trim();
+  const base = x.split(":")[0]; // e.g. tt13443470:1:1 -> tt13443470
   try {
-    if (OMDB_KEY && /^tt\d{7,}$/.test(x)) {
-      const url = `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${encodeURIComponent(x)}`;
+    if (OMDB_KEY && /^tt\d{7,}$/.test(base)) {
+      const url = `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${encodeURIComponent(base)}`;
       const resp = await fetch(url);
       if (resp && resp.ok) {
         const data = await resp.json();
