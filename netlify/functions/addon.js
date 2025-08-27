@@ -65,7 +65,7 @@ const manifest = {
   logo: LOGO,
   resources: ["stream"],                         // ← STREAM addon
   types: ["movie", "series"],
-  idPrefixes: ["tt","tmdb","tvdb","trakt","anidb","mal","kitsu"] // consulta con todos
+  idPrefixes: ["tt","tmdb","tvdb","trakt","anidb","mal","kitsu"], // consulta con todos
   catalogs: []
 };
 
