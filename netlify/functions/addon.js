@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const { addonBuilder, getInterface } = require("stremio-addon-sdk");
 const serverless = require("serverless-http");
 
 const {
@@ -22,31 +21,31 @@ const manifest = {
   catalogs: []
 };
 
-const builder = new addonBuilder(manifest);
-
-// META
-builder.defineMetaHandler(async ({ type, id }) => {
-  if (!/^tt\d{7,}$/.test(id || "")) return { meta: null };
-  return {
-    meta: {
-      id,
-      type,
-      name: `Open in MoviesInDetail (${id})`,
-      poster: LOGO,
-      description: "Open full details on moviesindetail.com",
-      links: [{ name: "Open in MoviesInDetail", url: LINK_TEMPLATE.replace(/{{id}}/g, id) }]
-    }
-  };
-});
-
 const app = express();
 app.use(cors());
 
-// Aquí: getInterface(builder) devuelve la función manejadora
-const iface = getInterface(builder);
-
+// Manifest
 app.get("/manifest.json", (_req, res) => res.json(manifest));
-app.get("/:resource/:type/:id.json", (req, res) => iface(req, res));
+
+// META: /meta/:type/:id.json
+app.get("/:resource/:type/:id.json", (req, res) => {
+  const { resource, type, id } = req.params;
+  if (resource !== "meta") return res.status(404).json({});
+  if (!["movie", "series"].includes(type) || !/^tt\d{7,}$/.test(id || "")) {
+    return res.json({ meta: null });
+  }
+  const meta = {
+    id,
+    type,
+    name: `Open in MoviesInDetail (${id})`,
+    poster: LOGO,
+    description: "Open full details on moviesindetail.com",
+    links: [{ name: "Open in MoviesInDetail", url: LINK_TEMPLATE.replace(/{{id}}/g, id) }]
+  };
+  res.json({ meta });
+});
+
+// Página simple
 app.get("/", (_req, res) => {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.end(`<h3>${manifest.name}</h3>
