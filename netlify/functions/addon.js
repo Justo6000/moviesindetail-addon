@@ -1,7 +1,6 @@
-// netlify/functions/addon.js
 const express = require("express");
 const cors = require("cors");
-const { addonBuilder } = require("stremio-addon-sdk"); // <- solo addonBuilder
+const { addonBuilder, getInterface } = require("stremio-addon-sdk");
 const serverless = require("serverless-http");
 
 const {
@@ -43,10 +42,9 @@ builder.defineMetaHandler(async ({ type, id }) => {
 const app = express();
 app.use(cors());
 
-// <- interfaz correcta del SDK
-const iface = builder.getInterface();
+// Aquí: getInterface(builder) devuelve la función manejadora
+const iface = getInterface(builder);
 
-// Rutas
 app.get("/manifest.json", (_req, res) => res.json(manifest));
 app.get("/:resource/:type/:id.json", (req, res) => iface(req, res));
 app.get("/", (_req, res) => {
