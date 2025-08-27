@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { addonBuilder, getInterface, getManifest } = require("stremio-addon-sdk");
+const { addonBuilder } = require("stremio-addon-sdk");
 const serverless = require("serverless-http");
 
 const {
@@ -45,8 +45,8 @@ builder.defineMetaHandler(async ({ type, id }) => {
 const app = express();
 app.use(cors());
 
-const iface = getInterface(builder);
-app.get("/manifest.json", (_req, res) => res.json(getManifest(builder)));
+const iface = builder.getInterface();
+app.get("/manifest.json", (_req, res) => res.json(manifest));
 app.get("/:resource/:type/:id.json", (req, res) => iface(req, res));
 app.get("/", (_req, res) => {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
