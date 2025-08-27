@@ -81,14 +81,16 @@ app.get("/stream/:type/:id.json", async (req, res) => {
   const title = await resolveTitle(type, id);
   const searchUrl = `${LINK_BASE}?q=${encodeURIComponent(title)}`;
 
+  // iOS (Stremio Lite) intenta reproducir 'url' internamente.
+  // Enviamos SOLO 'externalUrl' y behaviorHints para forzar navegador.
   const streams = [{
-    name: "MoviesInDetail",           // etiqueta corta
-    title: "Open in MoviesInDetail",  // texto en la lista
-    url: searchUrl,                   // enlace visible
-    externalUrl: searchUrl,           // fuerza clientes a tratarlo como externo
+    name: "MoviesInDetail",
+    title: "Open in MoviesInDetail",
+    externalUrl: searchUrl,
     behaviorHints: {
-      notWebReady: true,              // no reproducible internamente
-      openExternal: true              // preferir abrir fuera (navegador/webview)
+      openExternal: true,
+      notWebReady: true,
+      uiShowAllSources: true
     }
   }];
 
