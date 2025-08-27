@@ -66,6 +66,7 @@ const manifest = {
   resources: ["stream"],                         // ← STREAM addon
   types: ["movie", "series"],
   idPrefixes: ["tt","tmdb","tvdb","trakt","anidb","mal","kitsu"] // consulta con todos
+  catalogs: []
 };
 
 const app = express();
