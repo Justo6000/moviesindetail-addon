@@ -1,6 +1,6 @@
 [build]
   functions = "netlify/functions"
-  publish = "public"
+  publish = "."
 
 [[redirects]]
   from = "/manifest.json"
@@ -20,7 +20,6 @@
   status = 200
   force = true
 
-# CSP específica para addon (segura y compatible)
 [[headers]]
   for = "/*"
   [headers.values]
