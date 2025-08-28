@@ -1,4 +1,4 @@
-[[build]
+[build]
   functions = "netlify/functions"
   publish = "public"
 
@@ -6,25 +6,27 @@
   from = "/manifest.json"
   to = "/.netlify/functions/addon/manifest.json"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/stream/*"
   to = "/.netlify/functions/addon/stream/:splat"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/"
   to = "/.netlify/functions/addon"
   status = 200
+  force = true
 
-# Seguridad y privacidad con CSP más flexible
+# CSP específica para addon (segura y compatible)
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=(), fullscreen=(self), payment=()"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), fullscreen=(), payment=()"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    # CSP más relajada: permite self, HTTPS externo, inline styles e imágenes
-    Content-Security-Policy = "default-src 'self' https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' https:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    Content-Security-Policy = "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
