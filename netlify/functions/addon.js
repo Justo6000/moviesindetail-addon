@@ -5,7 +5,7 @@ const serverless = require("serverless-http");
 
 const {
   ADDON_NAME = "MoviesInDetail: Open Link",
-  ADDON_DESCRIPTION = "Adds an external stream that opens moviesindetail.com for any ID.",
+  ADDON_DESCRIPTION = "Search any movie or series and open MoviesInDetail.com to see detailed info: cast, crew, trailers, trivia and more.",
   LINK_BASE = "https://moviesindetail.com/",
   LOGO = "https://moviesindetail.com/logo-personal.png",
   OMDB_KEY = "" // opcional
@@ -54,10 +54,10 @@ async function resolveTitle(type, rawId) {
 
 const manifest = {
   id: "org.moviesindetail.openlink",
-  version: "2.0.6", // <- subida para forzar refresco
+  version: "2.0.8", // <- subida para forzar refresco
   name: ADDON_NAME,
   description: ADDON_DESCRIPTION,
-  logo: LOGO,
+  logo: "https://moviesindetail.com/logo-personal.png",
   resources: ["stream"],
   types: ["movie", "series"],
   idPrefixes: ["tt", "tmdb", "tvdb", "trakt", "anidb", "mal", "kitsu"],
