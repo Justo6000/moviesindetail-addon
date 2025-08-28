@@ -7,126 +7,123 @@ const {
   ADDON_NAME = "MoviesInDetail: Open Link",
   ADDON_DESCRIPTION = "Adds an external stream that opens moviesindetail.com for any ID.",
   LINK_BASE = "https://moviesindetail.com/",
-  LOGO = "https://moviesindetail.com/images/icon-192.webp",
-  OMDB_KEY = "" // opcional: si se establece y el ID es IMDb, resolvemos el título
+  LOGO = "https://moviesindetail.com/logo-personal.png",
+  OMDB_KEY = "" // opcional
 } = process.env;
 
-// Normaliza IDs para construir el enlace
+// (opcional) normalizador por si lo usas en el futuro
 function normalizeId(rawType, rawId) {
   const t = (rawType || "").toLowerCase();
   const x = (rawId || "").trim();
-
-  if (/^tt\d{7,}$/.test(x)) return { url: `${LINK_BASE}?imdb=${x}` };                         // IMDb
+  if (/^tt\d{7,}$/.test(x)) return { url: `${LINK_BASE}?imdb=${x}` };
   const mTmdb = x.match(/^tmdb:(movie|tv|person):(\d+)$/i);
-  if (mTmdb) {
-    const kind = mTmdb[1].toLowerCase();
-    const id = mTmdb[2];
-    return { url: `${LINK_BASE}?tmdb=${id}&type=${kind}` };
-  }
-  if (/^\d+$/.test(x) && (t === "movie" || t === "series")) {                                 // solo número → TMDb por tipo
+  if (mTmdb) return { url: `${LINK_BASE}?tmdb=${mTmdb[2]}&type=${mTmdb[1].toLowerCase()}` };
+  if (/^\d+$/.test(x) && (t === "movie" || t === "series")) {
     const kind = t === "series" ? "tv" : "movie";
     return { url: `${LINK_BASE}?tmdb=${x}&type=${kind}` };
   }
   const mTvdb = x.match(/^tvdb:(\d+)$/i);
   if (mTvdb) return { url: `${LINK_BASE}?tvdb=${mTvdb[1]}&type=${t}` };
-  const mTrak = x.match(/^trakt:(movie|show|episode):([A-Za-z0-9\-]+)$/i);
-  if (mTrak) {
-    const kind = mTrak[1].toLowerCase();
-    const id = mTrak[2];
-    return { url: `${LINK_BASE}?trakt=${id}&kind=${kind}` };
-  }
+  const mTrak = x.match(/^trakt:(movie|show|episode):([\w-]+)$/i);
+  if (mTrak) return { url: `${LINK_BASE}?trakt=${mTrak[2]}&kind=${mTrak[1].toLowerCase()}` };
   const mAni = x.match(/^anidb:(\d+)$/i);
   if (mAni) return { url: `${LINK_BASE}?anidb=${mAni[1]}` };
   const mMal = x.match(/^mal:(anime|manga):(\d+)$/i);
-  if (mMal) {
-    const kind = mMal[1].toLowerCase();
-    const id = mMal[2];
-    return { url: `${LINK_BASE}?mal=${id}&kind=${kind}` };
-  }
+  if (mMal) return { url: `${LINK_BASE}?mal=${mMal[2]}&kind=${mMal[1].toLowerCase()}` };
   const mKitsu = x.match(/^kitsu:(anime|manga):(\d+)$/i);
-  if (mKitsu) {
-    const kind = mKitsu[1].toLowerCase();
-    const id = mKitsu[2];
-    return { url: `${LINK_BASE}?kitsu=${id}&kind=${kind}` };
-  }
-
-  return { url: `${LINK_BASE}?id=${encodeURIComponent(x)}&type=${t}` };                       // fallback
+  if (mKitsu) return { url: `${LINK_BASE}?kitsu=${mKitsu[2]}&kind=${mKitsu[1].toLowerCase()}` };
+  return { url: `${LINK_BASE}?id=${encodeURIComponent(x)}&type=${t}` };
 }
 
-// Resuelve a un título legible cuando sea posible (IMDb vía OMDb). Fallback: devuelve el propio ID.
+// Resolver título legible (fallback al ID)
 async function resolveTitle(type, rawId) {
   const x = (rawId || "").trim();
-  const base = x.split(":")[0]; // e.g. tt13443470:1:1 -> tt13443470
+  const base = x.split(":")[0];
   try {
     if (OMDB_KEY && /^tt\d{7,}$/.test(base)) {
       const url = `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${encodeURIComponent(base)}`;
       const resp = await fetch(url);
-      if (resp && resp.ok) {
+      if (resp?.ok) {
         const data = await resp.json();
-        if (data && data.Title) return data.Title;
+        if (data?.Title) return data.Title;
       }
     }
-  } catch (_) {
-    // ignorar errores de red o JSON
-  }
-  return x; // fallback: usa el ID tal cual
+  } catch (_) {}
+  return x;
 }
 
 const manifest = {
   id: "org.moviesindetail.openlink",
-  version: "2.0.0",
+  version: "2.0.6", // <- subida para forzar refresco
   name: ADDON_NAME,
   description: ADDON_DESCRIPTION,
   logo: LOGO,
-  resources: ["stream"],                         // STREAM addon
+  resources: ["stream"],
   types: ["movie", "series"],
   idPrefixes: ["tt", "tmdb", "tvdb", "trakt", "anidb", "mal", "kitsu"],
   catalogs: [],
   stremioAddonsConfig: {
     issuer: "https://stremio-addons.net",
-    signature: "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..rnh8FCco4nMRfMcE3Jd9qA.PoumAgXBLmUDGy9wJDRvoq0gZL8fiqGVR8IdJX9K_cdIV2amt8HULJ7wkk0svb14Kq2Zi8vwFc9EvDgBEv51e4f8SEncWpdGrlN_UjuDwyxLP6tFxZmqveMYM2nlz7Cb.fEAuvqvrCVEHusQaucFizg"
+    signature:
+      "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..rnh8FCco4nMRfMcE3Jd9qA.PoumAgXBLmUDGy9wJDRvoq0gZL8fiqGVR8IdJX9K_cdIV2amt8HULJ7wkk0svb14Kq2Zi8vwFc9EvDgBEv51e4f8SEncWpdGrlN_UjuDwyxLP6tFxZmqveMYM2nlz7Cb.fEAuvqvrCVEHusQaucFizg"
   }
 };
 
 const app = express();
 app.use(cors());
 
-// Manifest
-app.get("/manifest.json", (_req, res) => res.json(manifest));
+// Manifest por ambas rutas y sin caché
+app.get(
+  ["/manifest.json", "/.netlify/functions/addon/manifest.json"],
+  (_req, res) => {
+    res.set({
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      Pragma: "no-cache",
+      Expires: "0"
+    });
+    res.json(manifest);
+  }
+);
 
-// STREAMS: aparece en la lista de Streams/Torrents de Stremio
-// Ruta: /stream/:type/:id.json
-app.get("/stream/:type/:id.json", async (req, res) => {
-  const { type, id } = req.params;
-  const title = await resolveTitle(type, id);
-  const searchUrl = `${LINK_BASE}?q=${encodeURIComponent(title)}`;
-
-  // iOS (Stremio Lite) intenta reproducir 'url' internamente.
-  // Enviamos SOLO 'externalUrl' y behaviorHints para forzar navegador.
-  const streams = [
-    {
-      name: "MoviesInDetail",
-      title: "Open in MoviesInDetail",
-      externalUrl: searchUrl,
-      behaviorHints: {
-        openExternal: true,
-        notWebReady: true,
-        uiShowAllSources: true
+// Streams por ambas rutas
+app.get(
+  ["/stream/:type/:id.json", "/.netlify/functions/addon/stream/:type/:id.json"],
+  async (req, res) => {
+    const { type, id } = req.params;
+    const title = await resolveTitle(type, id);
+    const searchUrl = `${LINK_BASE}?q=${encodeURIComponent(title)}`;
+    const streams = [
+      {
+        name: "MoviesInDetail",
+        title: "Open in MoviesInDetail",
+        externalUrl: searchUrl,
+        behaviorHints: {
+          openExternal: true,
+          notWebReady: true,
+          uiShowAllSources: true
+        }
       }
-    }
-  ];
+    ];
+    res.json({ streams });
+  }
+);
 
-  res.json({ streams });
-});
-
-// Página simple
+// Página HTML raíz
 app.get("/", (_req, res) => {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.end(`<h3>${manifest.name}</h3>
 <p>${manifest.description}</p>
 <p><a href="/manifest.json">/manifest.json</a></p>
-<p>Test stream IMDb: <code>/stream/movie/tt0133093.json</code></p>
-<p>Test stream TMDb: <code>/stream/movie/tmdb:movie:603.json</code></p>`);
+<p>Test stream IMDb: <code>/stream/movie/tt0133093.json</code></p>`);
+});
+
+// Página HTML en la base de la función
+app.get("/.netlify/functions/addon", (_req, res) => {
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.end(`<h3>${manifest.name}</h3>
+<p>${manifest.description}</p>
+<p><a href="/manifest.json">/manifest.json</a></p>
+<p>Test stream IMDb: <code>/stream/movie/tt0133093.json</code></p>`);
 });
 
 module.exports.handler = serverless(app);
