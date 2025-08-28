@@ -11,7 +11,7 @@ Deploy en Netlify Functions.
 - ADDON_NAME
 - ADDON_DESCRIPTION
 - LINK_TEMPLATE  (ej. https://moviesindetail.com/?q={{id}})
-- LOGO           (ej. https://moviesindetail.com/images/icon-192.webp)
+- LOGO           (ej. https://moviesindetail.com/logo-personal.png)
 
 ## Rutas
 - /manifest.json
