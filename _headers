@@ -1,0 +1,11 @@
+/manifest.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/stream/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
